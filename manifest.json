@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
   "name": "Random Google Bookmarks",
-  "version": "0.0.2",
+  "version": "0.0.3",
 
-  "description": "open a random google bookmarks with a specific tag in a new tab",
+  "description": "open a random google bookmarks with a specific label in a new tab",
   "icons": {
     "48": "img/icon-rgb-48.png"
   },

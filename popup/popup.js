@@ -8,8 +8,8 @@ $(function() {
   $('.button.reload').click(() => {
     browser.runtime.sendMessage({ cmd: 'reload' });
   });
-  $('.button.lasturl').click(() => {
-    browser.runtime.sendMessage({ cmd: 'lastUrl' });
+  $('.button.delete').click(() => {
+    browser.runtime.sendMessage({ cmd: 'delete' });
   });
 
   $('.labels').on('click', '.button.label', elem => {

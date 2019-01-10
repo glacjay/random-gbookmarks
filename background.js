@@ -1,5 +1,6 @@
+window.signature = null;
 window.bookmarks = null;
-window.lastUrl = null;
+window.lastId = null;
 window.labels = null;
 window.error = null;
 
@@ -13,6 +14,20 @@ function getXmlField(xml, field) {
 }
 
 async function reloadBookmarks() {
+  try {
+    const xmlDocument = await $.ajax({
+      method: 'GET',
+      url: 'https://www.google.com/bookmarks/lookup?output=rss',
+    });
+    window.signature = getXmlField(
+      xmlDocument.firstChild.firstChild,
+      'smh:signature',
+    ).textContent;
+  } catch (error) {
+    console.error('get signature error:', error);
+    window.error = error;
+  }
+
   try {
     const xmlDocument = await $.ajax({
       method: 'GET',
@@ -56,15 +71,28 @@ function openRandomBookmark(label) {
     if (hasLabel(bookmark, label)) {
       const url = getXmlField(bookmark, 'url').textContent;
       browser.tabs.create({ url });
-      window.lastUrl = url;
+      window.lastId = getXmlField(bookmark, 'id').textContent;
       break;
     }
   }
 }
 
-function copyLastUrlToClipboard() {
-  if (window.lastUrl) {
-    navigator.clipboard.writeText(window.lastUrl);
+async function deleteLastOpened() {
+  if (!window.lastId) {
+    return;
+  }
+
+  try {
+    const response = await $.ajax({
+      method: 'GET',
+      url: `https://www.google.com/bookmarks/mark?dlq=${window.lastId}&sig=${
+        window.signature
+      }`,
+    });
+    console.log('delete last opened:', response);
+  } catch (error) {
+    console.error('delete last opened error:', error);
+    window.error = error;
   }
 }
 
@@ -76,8 +104,8 @@ browser.runtime.onMessage.addListener(msg => {
     case 'random':
       openRandomBookmark(msg.label);
       break;
-    case 'lastUrl':
-      copyLastUrlToClipboard();
+    case 'delete':
+      deleteLastOpened();
       break;
   }
 });
