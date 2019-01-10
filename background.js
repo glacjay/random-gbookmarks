@@ -1,76 +1,85 @@
-window.bookmarks = null
-window.labels = null
-window.error = null
+window.bookmarks = null;
+window.lastUrl = null;
+window.labels = null;
+window.error = null;
 
 function getXmlField(xml, field) {
   for (let child of xml.children) {
     if (child.nodeName === field) {
-      return child
+      return child;
     }
   }
-  return null
+  return null;
 }
 
 async function reloadBookmarks() {
   try {
     const xmlDocument = await $.ajax({
       method: 'GET',
-      url: 'https://www.google.com/bookmarks/lookup?output=xml'
-    })
-    console.log('reload bookmarks:', xmlDocument)
+      url: 'https://www.google.com/bookmarks/lookup?output=xml',
+    });
+    console.log('reload bookmarks:', xmlDocument);
 
-    window.bookmarks = xmlDocument.firstChild.firstChild.children
+    window.bookmarks = xmlDocument.firstChild.firstChild.children;
 
-    labels = {}
+    labels = {};
     for (let bookmark of window.bookmarks) {
-      let blabels = getXmlField(bookmark, 'labels')
+      let blabels = getXmlField(bookmark, 'labels');
       for (let blabel of blabels.children) {
-        labels[blabel.textContent] = true
+        labels[blabel.textContent] = true;
       }
     }
-    window.labels = Object.keys(labels)
-
+    window.labels = Object.keys(labels);
   } catch (error) {
-    console.error('reload bookmarks error:', error)
-    window.error = error
+    console.error('reload bookmarks error:', error);
+    window.error = error;
   }
 }
 
 function openRandomBookmark(label) {
   if (!bookmarks) {
-    return
+    return;
   }
 
   function hasLabel(bookmark, label) {
     for (let l of getXmlField(bookmark, 'labels').children) {
       if (l.textContent === label) {
-        return true
+        return true;
       }
     }
-    return false
+    return false;
   }
 
   while (true) {
-    const idx = Math.floor(Math.random() * bookmarks.length)
-    const bookmark = bookmarks[idx]
+    const idx = Math.floor(Math.random() * bookmarks.length);
+    const bookmark = bookmarks[idx];
     if (hasLabel(bookmark, label)) {
-      browser.tabs.create({
-        url: getXmlField(bookmark, 'url').textContent
-      })
-      break
+      const url = getXmlField(bookmark, 'url').textContent;
+      browser.tabs.create({ url });
+      window.lastUrl = url;
+      break;
     }
+  }
+}
+
+function copyLastUrlToClipboard() {
+  if (window.lastUrl) {
+    navigator.clipboard.writeText(window.lastUrl);
   }
 }
 
 browser.runtime.onMessage.addListener(msg => {
   switch (msg.cmd) {
     case 'reload':
-      reloadBookmarks()
-      break
+      reloadBookmarks();
+      break;
     case 'random':
-      openRandomBookmark(msg.label)
-      break
+      openRandomBookmark(msg.label);
+      break;
+    case 'lastUrl':
+      copyLastUrlToClipboard();
+      break;
   }
-})
+});
 
-reloadBookmarks()
+reloadBookmarks();
