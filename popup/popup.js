@@ -9,6 +9,24 @@ $(function() {
     browser.runtime.sendMessage({ cmd: 'reload' });
   });
   $('.button.delete').click(() => {
+    browser.runtime.getBackgroundPage().then(background => {
+      const bookmark = background.lastBookmark;
+      $('#confirm-dialog').removeClass('hidden');
+      $('#confirm-title').text(
+        background.getXmlField(bookmark, 'title').textContent,
+      );
+      $('#confirm-url').text(
+        background.getXmlField(bookmark, 'url').textContent,
+      );
+    });
+  });
+  $('.button.cancel').click(() => {
+    $('#confirm-dialog').addClass('hidden');
+    window.close();
+  });
+  $('.button.ok').click(() => {
+    $('#confirm-dialog').addClass('hidden');
+    window.close();
     browser.runtime.sendMessage({ cmd: 'delete' });
   });
 

@@ -1,6 +1,6 @@
 window.signature = null;
 window.bookmarks = null;
-window.lastId = null;
+window.lastBookmark = null;
 window.labels = null;
 window.error = null;
 
@@ -71,23 +71,23 @@ function openRandomBookmark(label) {
     if (hasLabel(bookmark, label)) {
       const url = getXmlField(bookmark, 'url').textContent;
       browser.tabs.create({ url });
-      window.lastId = getXmlField(bookmark, 'id').textContent;
+      window.lastBookmark = bookmark;
       break;
     }
   }
 }
 
 async function deleteLastOpened() {
-  if (!window.lastId) {
+  if (!window.lastBookmark) {
     return;
   }
 
   try {
     const response = await $.ajax({
       method: 'GET',
-      url: `https://www.google.com/bookmarks/mark?dlq=${window.lastId}&sig=${
-        window.signature
-      }`,
+      url: `https://www.google.com/bookmarks/mark?dlq=${
+        getXmlField(window.lastBookmark, 'id').textContent
+      }&sig=${window.signature}`,
     });
     console.log('delete last opened:', response);
   } catch (error) {

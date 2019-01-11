@@ -1,5 +1,16 @@
-<meta charset="UTF-8" />
-<link rel="stylesheet" href="popup.css" />
+<meta charset="UTF-8" /> <link rel="stylesheet" href="popup.css" />
+
+<div id="confirm-dialog" class="hidden">
+  <div>确定删除书签？</div>
+  <div>标题：<span id="confirm-title"></span></div>
+  <div>URL: <span id="confirm-url"></span></div>
+  <div>
+    <div class="button inline cancel">cancel</div>
+    <div class="button inline ok">ok</div>
+  </div>
+</div>
+
+<div id="error-content" class="hidden"></div>
 
 <div id="popup-content">
   <div class="button common opengb">opengb</div>
@@ -7,9 +18,6 @@
   <div class="button common delete">delete</div>
   <div>labels:</div>
   <div class="labels"></div>
-</div>
-
-<div id="error-content" class="hidden">
 </div>
 
 <script src="/lib/jquery.min.js"></script>
